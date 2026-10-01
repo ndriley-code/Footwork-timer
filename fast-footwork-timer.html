@@ -147,13 +147,13 @@ select{font:500 15px 'Barlow',system-ui,sans-serif;padding:9px 10px;border-radiu
       <h1>Fast footwork</h1>
       <p>DMS warm-up with spoken cues</p>
     </div>
-    <div class="total"><b id="totalTime">5:20</b><span>total</span></div>
+    <div class="total"><b id="totalTime">6:40</b><span>total</span></div>
   </header>
 
   <section class="stage" id="stage" data-phase="idle" aria-label="Timer">
     <div class="stage-top">
       <span class="pill" id="phaseLabel" aria-live="polite">Ready</span>
-      <span class="count" id="exCount">1 of 12</span>
+      <span class="count" id="exCount">1 of 16</span>
     </div>
     <div class="ring-wrap">
       <svg class="ring" viewBox="0 0 200 200" aria-hidden="true">
@@ -214,6 +214,10 @@ select{font:500 15px 'Barlow',system-ui,sans-serif;padding:9px 10px;border-radiu
         <div class="stepper" data-key="single"><button type="button" data-d="-1" aria-label="Shorter">−</button><output>10s</output><button type="button" data-d="1" aria-label="Longer">+</button></div>
       </div>
       <div class="setting">
+        <div><div class="s-label">Oblique jumps 13 to 16</div><div class="s-hint">Work time for each</div></div>
+        <div class="stepper" data-key="oblique"><button type="button" data-d="-1" aria-label="Shorter">−</button><output>10s</output><button type="button" data-d="1" aria-label="Longer">+</button></div>
+      </div>
+      <div class="setting">
         <div><div class="s-label">Rest between drills</div><div class="s-hint">Next drill is announced here</div></div>
         <div class="stepper" data-key="rest"><button type="button" data-d="-1" aria-label="Shorter">−</button><output>10s</output><button type="button" data-d="1" aria-label="Longer">+</button></div>
       </div>
@@ -240,7 +244,7 @@ select{font:500 15px 'Barlow',system-ui,sans-serif;padding:9px 10px;border-radiu
     </div>
   </details>
 
-  <p class="credit">Sequence from the Focused Running activation and DMS sheet.</p>
+  <p class="credit">Drills 1 to 12 from the Focused Running activation and DMS sheet; oblique jumps added.</p>
 </main>
 
 <script>
@@ -259,14 +263,22 @@ const EX=[
   {n:'Single leg forward',foot:'One leg',dir:'up',g:'single'},
   {n:'Single leg backwards',foot:'One leg',dir:'down',g:'single'},
   {n:'Single leg lateral left',foot:'One leg',dir:'left',g:'single'},
-  {n:'Single leg lateral right',foot:'One leg',dir:'right',g:'single'}
+  {n:'Single leg lateral right',foot:'One leg',dir:'right',g:'single'},
+  {n:'Oblique forward to the right',foot:'Oblique jump',dir:'fr',g:'oblique'},
+  {n:'Oblique forward to the left',foot:'Oblique jump',dir:'fl',g:'oblique'},
+  {n:'Oblique backward to the right',foot:'Oblique jump',dir:'br',g:'oblique'},
+  {n:'Oblique backward to the left',foot:'Oblique jump',dir:'bl',g:'oblique'}
 ];
-const DIRTXT={up:'Forward over the line',down:'Backwards over the line',left:'Sideways to the left',right:'Sideways to the right'};
+const DIRTXT={up:'Forward over the line',down:'Backwards over the line',left:'Sideways to the left',right:'Sideways to the right',fr:'Diagonally forward to the right',fl:'Diagonally forward to the left',br:'Diagonally backwards to the right',bl:'Diagonally backwards to the left'};
 const ARROWS={
   up:{l:[86,98,86,40],h:'86,22 75,41 97,41'},
   down:{l:[86,22,86,80],h:'86,98 75,79 97,79'},
   left:{l:[98,86,40,86],h:'22,86 41,75 41,97'},
-  right:{l:[22,86,80,86],h:'98,86 79,75 79,97'}
+  right:{l:[22,86,80,86],h:'98,86 79,75 79,97'},
+  fr:{l:[26,94,82,38],h:'94,26 72.8,31.6 88.4,47.2'},
+  fl:{l:[94,94,38,38],h:'26,26 47.2,31.6 31.6,47.2'},
+  br:{l:[26,26,82,82],h:'94,94 72.8,88.4 88.4,72.8'},
+  bl:{l:[94,26,38,82],h:'26,94 47.2,88.4 31.6,72.8'}
 };
 const ICONS={
   play:'<path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.2-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/>',
@@ -274,8 +286,8 @@ const ICONS={
   again:'<path d="M12 5V2.5L7.5 6.5 12 10.5V7.5a4.5 4.5 0 1 1-4.5 4.5H5a7 7 0 1 0 7-7z"/>'
 };
 const KEY='ff-dms-timer-v1';
-const DEFAULTS={drill:20,single:10,rest:10,lead:10,voice:true,beeps:true,voiceName:''};
-const LIMITS={drill:[5,60,5],single:[5,30,5],rest:[0,30,5],lead:[5,30,5]};
+const DEFAULTS={drill:20,single:10,oblique:10,rest:10,lead:10,voice:true,beeps:true,voiceName:''};
+const LIMITS={drill:[5,60,5],single:[5,30,5],oblique:[5,30,5],rest:[0,30,5],lead:[5,30,5]};
 
 /* ---------- settings ---------- */
 function load(){
@@ -291,7 +303,7 @@ for(const k in LIMITS){
 S.voice=S.voice!==false; S.beeps=S.beeps!==false;
 
 /* ---------- phases ---------- */
-const durFor=e=>e.g==='single'?S.single:S.drill;
+const durFor=e=>e.g==='single'?S.single:e.g==='oblique'?S.oblique:S.drill;
 function buildPhases(){
   const p=[{type:'prep',dur:S.lead,ex:0}];
   EX.forEach((e,i)=>{
@@ -521,7 +533,7 @@ function render(){
   el.ring.style.strokeDashoffset=(CIRC*(1-frac)).toFixed(2);
   el.ring.style.opacity=frac<0.004?'0':'1';
 
-  el.pre.textContent=done?'All twelve drills':state==='work'?'Now':state==='idle'?(ph.ex===0?'First up':'Starting from'):'Next up';
+  el.pre.textContent=done?'All '+EX.length+' drills':state==='work'?'Now':state==='idle'?(ph.ex===0?'First up':'Starting from'):'Next up';
   el.name.textContent=done?'Complete':e.n;
   el.foot.textContent=e.foot; el.dir.textContent=DIRTXT[e.dir];
   const a=ARROWS[e.dir];
