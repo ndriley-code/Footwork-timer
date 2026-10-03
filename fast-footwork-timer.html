@@ -76,6 +76,8 @@ button:focus-visible,select:focus-visible{outline:3px solid var(--work);outline-
 .dir .tape{stroke:var(--tape);stroke-width:9;stroke-linecap:butt;opacity:.9}
 .dir .arrow{stroke:var(--phase);stroke-width:8;stroke-linecap:round}
 .dir .arrow-head{fill:var(--phase)}
+.dir .arrow-head.second{opacity:.4}
+.dir .arrow-dot{fill:var(--surface);stroke:var(--phase);stroke-width:4}
 .foot{font-weight:600;font-size:16px;line-height:1.25}
 .foot small{display:block;font-weight:400;font-size:14px;color:var(--muted)}
 .next{margin:16px 0 0;padding-top:12px;border-top:1px dashed var(--line);text-align:center;color:var(--muted);font-size:15px}
@@ -147,13 +149,13 @@ select{font:500 15px 'Barlow',system-ui,sans-serif;padding:9px 10px;border-radiu
       <h1>Fast footwork</h1>
       <p>DMS warm-up with spoken cues</p>
     </div>
-    <div class="total"><b id="totalTime">6:40</b><span>total</span></div>
+    <div class="total"><b id="totalTime">10:20</b><span>total</span></div>
   </header>
 
   <section class="stage" id="stage" data-phase="idle" aria-label="Timer">
     <div class="stage-top">
       <span class="pill" id="phaseLabel" aria-live="polite">Ready</span>
-      <span class="count" id="exCount">1 of 16</span>
+      <span class="count" id="exCount">1 of 22</span>
     </div>
     <div class="ring-wrap">
       <svg class="ring" viewBox="0 0 200 200" aria-hidden="true">
@@ -173,6 +175,8 @@ select{font:500 15px 'Barlow',system-ui,sans-serif;padding:9px 10px;border-radiu
         <line class="tape" x1="14" y1="60" x2="106" y2="60"/>
         <line class="arrow" id="arrowLine" x1="86" y1="98" x2="86" y2="40"/>
         <polygon class="arrow-head" id="arrowHead" points="86,22 75,41 97,41"/>
+        <polygon class="arrow-head second" id="arrowHead2" points=""/>
+        <circle class="arrow-dot" id="arrowDot" cx="60" cy="60" r="7" style="display:none"/>
       </svg>
       <div class="foot"><span id="footLabel">Left foot</span><small id="dirLabel">Forward over the line</small></div>
     </div>
@@ -210,12 +214,16 @@ select{font:500 15px 'Barlow',system-ui,sans-serif;padding:9px 10px;border-radiu
         <div class="stepper" data-key="drill"><button type="button" data-d="-1" aria-label="Shorter">−</button><output>20s</output><button type="button" data-d="1" aria-label="Longer">+</button></div>
       </div>
       <div class="setting">
-        <div><div class="s-label">Single-leg drills 9 to 12</div><div class="s-hint">The sheet specifies 10 seconds</div></div>
-        <div class="stepper" data-key="single"><button type="button" data-d="-1" aria-label="Shorter">−</button><output>10s</output><button type="button" data-d="1" aria-label="Longer">+</button></div>
+        <div><div class="s-label">Middle jumps 9 to 12</div><div class="s-hint">Out, back to the middle, then across</div></div>
+        <div class="stepper" data-key="via"><button type="button" data-d="-1" aria-label="Shorter">−</button><output>20s</output><button type="button" data-d="1" aria-label="Longer">+</button></div>
       </div>
       <div class="setting">
         <div><div class="s-label">Oblique jumps 13 to 16</div><div class="s-hint">Work time for each</div></div>
         <div class="stepper" data-key="oblique"><button type="button" data-d="-1" aria-label="Shorter">−</button><output>10s</output><button type="button" data-d="1" aria-label="Longer">+</button></div>
+      </div>
+      <div class="setting">
+        <div><div class="s-label">Three-step drills 17 to 22</div><div class="s-hint">Work time for each</div></div>
+        <div class="stepper" data-key="steps"><button type="button" data-d="-1" aria-label="Shorter">−</button><output>20s</output><button type="button" data-d="1" aria-label="Longer">+</button></div>
       </div>
       <div class="setting">
         <div><div class="s-label">Rest between drills</div><div class="s-hint">Next drill is announced here</div></div>
@@ -244,7 +252,7 @@ select{font:500 15px 'Barlow',system-ui,sans-serif;padding:9px 10px;border-radiu
     </div>
   </details>
 
-  <p class="credit">Drills 1 to 12 from the Focused Running activation and DMS sheet; oblique jumps added.</p>
+  <p class="credit">Drills 1 to 8 from the Focused Running activation and DMS sheet.</p>
 </main>
 
 <script>
@@ -260,16 +268,22 @@ const EX=[
   {n:'Double leg backwards',foot:'Both feet',dir:'down',g:'drill'},
   {n:'Double leg lateral left',foot:'Both feet',dir:'left',g:'drill'},
   {n:'Double leg lateral right',foot:'Both feet',dir:'right',g:'drill'},
-  {n:'Single leg forward',foot:'One leg',dir:'up',g:'single'},
-  {n:'Single leg backwards',foot:'One leg',dir:'down',g:'single'},
-  {n:'Single leg lateral left',foot:'One leg',dir:'left',g:'single'},
-  {n:'Single leg lateral right',foot:'One leg',dir:'right',g:'single'},
+  {n:'Lateral left, middle, right',foot:'Jumps via the middle',dir:'lr',g:'via'},
+  {n:'Lateral right, middle, left',foot:'Jumps via the middle',dir:'rl',g:'via'},
+  {n:'Forward, middle, backwards',foot:'Jumps via the middle',dir:'fb',g:'via'},
+  {n:'Backwards, middle, forwards',foot:'Jumps via the middle',dir:'bf',g:'via'},
   {n:'Oblique forward to the right',foot:'Oblique jump',dir:'fr',g:'oblique'},
   {n:'Oblique forward to the left',foot:'Oblique jump',dir:'fl',g:'oblique'},
   {n:'Oblique backward to the right',foot:'Oblique jump',dir:'br',g:'oblique'},
-  {n:'Oblique backward to the left',foot:'Oblique jump',dir:'bl',g:'oblique'}
+  {n:'Oblique backward to the left',foot:'Oblique jump',dir:'bl',g:'oblique'},
+  {n:'3 steps left',foot:'3 steps',dir:'left',g:'steps'},
+  {n:'3 steps right',foot:'3 steps',dir:'right',g:'steps'},
+  {n:'3 steps diagonal right forward',foot:'3 steps',dir:'fr',g:'steps'},
+  {n:'3 steps diagonal left forward',foot:'3 steps',dir:'fl',g:'steps'},
+  {n:'3 steps diagonal right backwards',foot:'3 steps',dir:'br',g:'steps'},
+  {n:'3 steps diagonal left backwards',foot:'3 steps',dir:'bl',g:'steps'}
 ];
-const DIRTXT={up:'Forward over the line',down:'Backwards over the line',left:'Sideways to the left',right:'Sideways to the right',fr:'Diagonally forward to the right',fl:'Diagonally forward to the left',br:'Diagonally backwards to the right',bl:'Diagonally backwards to the left'};
+const DIRTXT={up:'Forward over the line',down:'Backwards over the line',left:'Sideways to the left',right:'Sideways to the right',fr:'Diagonally forward to the right',fl:'Diagonally forward to the left',br:'Diagonally backwards to the right',bl:'Diagonally backwards to the left',lr:'Left, back to the middle, then right',rl:'Right, back to the middle, then left',fb:'Forward, back to the middle, then backwards',bf:'Backwards, back to the middle, then forwards'};
 const ARROWS={
   up:{l:[86,98,86,40],h:'86,22 75,41 97,41'},
   down:{l:[86,22,86,80],h:'86,98 75,79 97,79'},
@@ -278,7 +292,11 @@ const ARROWS={
   fr:{l:[26,94,82,38],h:'94,26 72.8,31.6 88.4,47.2'},
   fl:{l:[94,94,38,38],h:'26,26 47.2,31.6 31.6,47.2'},
   br:{l:[26,26,82,82],h:'94,94 72.8,88.4 88.4,72.8'},
-  bl:{l:[94,26,38,82],h:'26,94 47.2,88.4 31.6,72.8'}
+  bl:{l:[94,26,38,82],h:'26,94 47.2,88.4 31.6,72.8'},
+  lr:{l:[38,86,82,86],h:'22,86 41,75 41,97',h2:'98,86 79,75 79,97',dot:[60,86]},
+  rl:{l:[38,86,82,86],h:'98,86 79,75 79,97',h2:'22,86 41,75 41,97',dot:[60,86]},
+  fb:{l:[86,38,86,82],h:'86,22 75,41 97,41',h2:'86,98 75,79 97,79',dot:[86,60]},
+  bf:{l:[86,38,86,82],h:'86,98 75,79 97,79',h2:'86,22 75,41 97,41',dot:[86,60]}
 };
 const ICONS={
   play:'<path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.2-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/>',
@@ -286,8 +304,8 @@ const ICONS={
   again:'<path d="M12 5V2.5L7.5 6.5 12 10.5V7.5a4.5 4.5 0 1 1-4.5 4.5H5a7 7 0 1 0 7-7z"/>'
 };
 const KEY='ff-dms-timer-v1';
-const DEFAULTS={drill:20,single:10,oblique:10,rest:10,lead:10,voice:true,beeps:true,voiceName:''};
-const LIMITS={drill:[5,60,5],single:[5,30,5],oblique:[5,30,5],rest:[0,30,5],lead:[5,30,5]};
+const DEFAULTS={drill:20,via:20,oblique:10,steps:20,rest:10,lead:10,voice:true,beeps:true,voiceName:''};
+const LIMITS={drill:[5,60,5],via:[5,60,5],oblique:[5,30,5],steps:[5,60,5],rest:[0,30,5],lead:[5,30,5]};
 
 /* ---------- settings ---------- */
 function load(){
@@ -303,7 +321,7 @@ for(const k in LIMITS){
 S.voice=S.voice!==false; S.beeps=S.beeps!==false;
 
 /* ---------- phases ---------- */
-const durFor=e=>e.g==='single'?S.single:e.g==='oblique'?S.oblique:S.drill;
+const durFor=e=>e.g==='via'?S.via:e.g==='oblique'?S.oblique:e.g==='steps'?S.steps:S.drill;
 function buildPhases(){
   const p=[{type:'prep',dur:S.lead,ex:0}];
   EX.forEach((e,i)=>{
@@ -331,7 +349,7 @@ const fmtT=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
 const $=id=>document.getElementById(id);
 const el={
   stage:$('stage'),phase:$('phaseLabel'),count:$('exCount'),time:$('time'),unit:$('unit'),ring:$('ringFg'),
-  pre:$('exPre'),name:$('exName'),foot:$('footLabel'),dir:$('dirLabel'),aLine:$('arrowLine'),aHead:$('arrowHead'),
+  pre:$('exPre'),name:$('exName'),foot:$('footLabel'),dir:$('dirLabel'),aLine:$('arrowLine'),aHead:$('arrowHead'),aHead2:$('arrowHead2'),aDot:$('arrowDot'),
   next:$('nextLine'),play:$('playBtn'),playText:$('playText'),playIcon:$('playIcon'),prev:$('prevBtn'),
   nextBtn:$('nextBtn'),reset:$('resetBtn'),total:$('totalTime'),seq:$('seq'),hint:$('audioHint'),
   voiceChk:$('voiceChk'),beepChk:$('beepChk'),voiceSel:$('voiceSel'),test:$('testBtn')
@@ -540,6 +558,9 @@ function render(){
   el.aLine.setAttribute('x1',a.l[0]); el.aLine.setAttribute('y1',a.l[1]);
   el.aLine.setAttribute('x2',a.l[2]); el.aLine.setAttribute('y2',a.l[3]);
   el.aHead.setAttribute('points',a.h);
+  el.aHead2.setAttribute('points',a.h2||'');
+  if(a.dot){ el.aDot.setAttribute('cx',a.dot[0]); el.aDot.setAttribute('cy',a.dot[1]); el.aDot.style.display=''; }
+  else el.aDot.style.display='none';
 
   const after=ph.ex+1<EX.length?EX[ph.ex+1].n:null;
   el.next.innerHTML=done?'Tap <b>Go again</b> to repeat the set':(after?'Then: <b>'+after+'</b>':'<b>Final drill</b>');
